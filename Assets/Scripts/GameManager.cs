@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        Application.targetFrameRate = 60;
         myCharacterController = FindObjectOfType<MyCharacterController>();
         audioManager = FindObjectOfType<AudioManager>();
         uIController = FindObjectOfType<UIController>();
