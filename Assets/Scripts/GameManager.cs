@@ -1,16 +1,31 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField]
     public Material finishMeshMaterial;
     public int gameLength;
-    public GameObject cameraLookAt;
+    public int gameIncreaseByLevel = 2;
+    private MyCharacterController myCharacterController;
+    private CameraController cameraController;
 
+
+    private void Awake()
+    {
+        myCharacterController = FindObjectOfType<MyCharacterController>();
+        cameraController = myCharacterController.GetComponent<CameraController>();
+
+    }
 
     private void Start()
+    {
+        GenerateGame();
+    }
+
+    public void NextLevel()
     {
         GenerateGame();
     }
@@ -24,68 +39,94 @@ public class GameManager : MonoBehaviour
 
     private void ResetGame()
     {
-        Constants.allStackControllers = new List<StackController>();
+        Constants.currentStack = 1;
+        Destroy(GameObject.FindGameObjectWithTag("finishStack"));
+        Destroy(GameObject.FindGameObjectWithTag("startStack"));
+        myCharacterController.UseGravity(false);
+        cameraController.CameraChange(false);
         Constants.gameStarted = false;
         Constants.gameWon = false;
     }
 
     private void GenerateLevel()
     {
-        Constants.allStackControllers = LevelGeneration.GenerateLevel(gameLength, finishMeshMaterial);
+        Constants.allStackControllers = LevelGeneration.GenerateLevel(gameLength + gameIncreaseByLevel * Constants.level, finishMeshMaterial);
     }
 
-    private void StartGame()
+    private void WonGameBegin()
     {
-        Constants.allStackControllers[Constants.currentStack].StartStack();
+        Constants.lastStack = 0;
+        for (int i = 1; i<= Constants.level; i++)
+        {
+            Constants.lastStack += gameLength + (i * gameIncreaseByLevel) + 1; 
+        }
+        Constants.level++;
+        Constants.gameWon = true;
+        Constants.gameStarted = false;
+        Constants.gameGenerated = false;
+        cameraController.CameraChange(true);
+        myCharacterController.WonGameBegin(this);
     }
 
+    private void LostGame()
+    {
+        Constants.gameGenerated = false;
+        myCharacterController.UseGravity(true);
+    }
 
     private void Update()
     {
+        if (Constants.gameWon)
+            return;
         if (Input.GetMouseButtonDown(0))
         {
-            if (Constants.gameStarted)
+            if (Constants.gameStarted && Constants.gameGenerated)
             {
                 ClickAfterStart();
             }
             if (Constants.gameGenerated && !Constants.gameStarted)
             {
                 PlayerStartGame();
-                ChangeCameraLookAtPosition();
+                cameraController.ChangeCameraLookAtPosition();
             }
         }
     }
 
     private void ClickAfterStart()
     {
-        Constants.currentStack++;
-        if (Constants.currentStack == gameLength)
-        {
-            Constants.gameWon = true;
-            Constants.gameStarted = false;
-            Constants.gameGenerated = false;
-            return;
-        }
+        NextStack();
+    }
 
-        StackController nextStack = Constants.allStackControllers[Constants.currentStack];
+    private void NextStack()
+    {
+        Constants.currentStack++;
         StackController currentStack = Constants.allStackControllers[Constants.currentStack - 1];
         StackController lastStack = Constants.allStackControllers[Constants.currentStack - 2];
-
         currentStack.StopStack();
         GameObject cutStack = StackCut.CutStack(currentStack.transform, lastStack.transform);
 
         if (cutStack != null)
         {
             Constants.allStackControllers[Constants.currentStack - 1] = cutStack.GetComponent<StackController>();
-            Constants.allStackControllers[Constants.currentStack].transform.localScale = cutStack.transform.localScale;
-            ChangeCameraLookAtPosition();
-            nextStack.StartStack();
+            cameraController.ChangeCameraLookAtPosition();
+            if (Constants.currentStack == gameLength + gameIncreaseByLevel * Constants.level)
+            {
+                WonGameBegin();
+                return;
+            }
+            else
+            {
+                Constants.allStackControllers[Constants.currentStack].transform.localScale = cutStack.transform.localScale;
+                StackController nextStack = Constants.allStackControllers[Constants.currentStack];
+                nextStack.StartStack();
+            }
         }
         else
         {
             currentStack.gameObject.SetActive(true);
             currentStack.StopStack();
             currentStack.gameObject.AddComponent<Rigidbody>().mass = 100f;
+            LostGame();
         }
     }
 
@@ -95,11 +136,10 @@ public class GameManager : MonoBehaviour
         Constants.gameStarted = true;
     }
 
-    private void ChangeCameraLookAtPosition()
+
+    private void StartGame()
     {
-        LeanTween.move(cameraLookAt,
-            new Vector3(Constants.allStackControllers[Constants.currentStack - 1].transform.position.x,
-            cameraLookAt.transform.position.y, Constants.allStackControllers[Constants.currentStack - 1].transform.position.z + 1f), 0.5f);
+        Constants.allStackControllers[Constants.currentStack].StartStack();
     }
 
 }

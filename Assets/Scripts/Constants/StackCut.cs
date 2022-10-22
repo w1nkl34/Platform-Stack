@@ -11,8 +11,6 @@ public class StackCut : MonoBehaviour
 
     public static GameObject CutStack(Transform currentCube,Transform lastCube)
     {
-        activeObject = null;
-        inActiveObject = null;
         currentCube.gameObject.SetActive(false);
 
         if (Mathf.Abs(currentCube.position.x - lastCube.position.x) >= currentCube.localScale.x)

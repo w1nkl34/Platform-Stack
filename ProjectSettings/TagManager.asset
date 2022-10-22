@@ -7,6 +7,9 @@ TagManager:
   - Ground
   - finishStack
   - startStack
+  - cameraLookAt
+  - cmGameplay
+  - cmCharacter
   layers:
   - Default
   - TransparentFX

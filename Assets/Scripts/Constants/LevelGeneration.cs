@@ -19,11 +19,11 @@ public class LevelGeneration : MonoBehaviour
     {
         GameObject startMesh = GameObject.CreatePrimitive(PrimitiveType.Cube);
         startMesh.GetComponent<MeshRenderer>().material = finishMeshMaterial;
-        startMesh.transform.position = new Vector3(0, meshYAxisPos, 0);
-        startMesh.transform.localScale = new Vector3(10, 0.25f, 2f);
+        startMesh.transform.position = new Vector3(0, meshYAxisPos, Constants.lastStack * 3);
+        startMesh.transform.localScale = new Vector3(10, 0.25f, 3f);
         startMesh.name = "Start Stack";
         startMesh.tag = "startStack";
-        GameObject finishMesh = Instantiate(startMesh, new Vector3(0, meshYAxisPos, 2 + gameLength * 3), Quaternion.identity);
+        GameObject finishMesh = Instantiate(startMesh, new Vector3(0, meshYAxisPos, 3 + gameLength * 3 + Constants.lastStack * 3), Quaternion.identity);
         finishMesh.name = "Finish Stack";
         finishMesh.tag = "finishStack";
     }
@@ -43,7 +43,7 @@ public class LevelGeneration : MonoBehaviour
                 spawnPosx = Random.Range(-4f, 4f);
             }
             GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.transform.position = new Vector3(spawnPosx , meshYAxisPos, 2.5f + i * 3);
+            cube.transform.position = new Vector3(spawnPosx , meshYAxisPos, 3f+ (i * 3) +  Constants.lastStack * 3);
             cube.transform.localScale = new Vector3(4, 0.25f, 3f);
             cube.transform.parent = middleStacksParent.transform;
             cube.GetComponent<MeshRenderer>().material.
