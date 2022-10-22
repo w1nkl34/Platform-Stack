@@ -7,7 +7,7 @@ public class MyCharacterController : MonoBehaviour
     private Rigidbody rb;
     private Animator anim;
     private CameraController cameraController;
-    public float speed = 1;
+    private float speed = 2;
 
     private void Awake()
     {
@@ -37,7 +37,7 @@ public class MyCharacterController : MonoBehaviour
     private float CalculateDistanceToCurrentStack()
     {
         if (!Constants.gameGenerated)
-            return 2;
+            return 1;
         return Mathf.Max(Vector3.Distance(Constants.allStackControllers[Constants.currentStack - 1].transform.position, transform.position),1);
     }
 
@@ -66,6 +66,12 @@ public class MyCharacterController : MonoBehaviour
     public void UseGravity(bool use)
     {
         rb.useGravity = use;
+    }
+
+    public void ResetPosition()
+    {
+        transform.position = new Vector3(0, 0, GameObject.FindGameObjectWithTag("startStack").transform.position.z);
+        cameraController.ChangeCameraLookAtPositionToStart();
     }
 
 }

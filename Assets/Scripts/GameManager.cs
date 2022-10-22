@@ -17,7 +17,6 @@ public class GameManager : MonoBehaviour
     {
         myCharacterController = FindObjectOfType<MyCharacterController>();
         cameraController = myCharacterController.GetComponent<CameraController>();
-
     }
 
     private void Start()
@@ -68,16 +67,48 @@ public class GameManager : MonoBehaviour
         myCharacterController.WonGameBegin(this);
     }
 
-    private void LostGame()
+    private void LostGame(bool fromUpdate)
     {
+        int beforeStack = fromUpdate ? 0 : 1;
+        Constants.allStackControllers[Constants.currentStack - beforeStack].gameObject.SetActive(true);
+        Constants.allStackControllers[Constants.currentStack - beforeStack].StopStack();
+        Constants.allStackControllers[Constants.currentStack - beforeStack].gameObject.AddComponent<Rigidbody>().mass = 100f;
         Constants.gameGenerated = false;
         myCharacterController.UseGravity(true);
+        StartCoroutine(LevelRepeat());
+    }
+
+    private IEnumerator LevelRepeat()
+    {
+        yield return new WaitForSeconds(2f);
+        RefreshGame();
+        GenerateGame();
+        myCharacterController.ResetPosition();
+    }
+
+    private void RefreshGame()
+    {
+        foreach(var item in Constants.allStackControllers)
+        {
+            Destroy(item.gameObject);
+        }
+    }
+
+    private void CheckCharacterDrop()
+    {
+        if(myCharacterController.transform.position.z >= Constants.allStackControllers[Constants.currentStack].transform.position.z)
+        {
+            LostGame(true);
+        }
     }
 
     private void Update()
     {
         if (Constants.gameWon)
             return;
+
+        if (Constants.gameGenerated && Constants.gameStarted)
+        CheckCharacterDrop();
         if (Input.GetMouseButtonDown(0))
         {
             if (Constants.gameStarted && Constants.gameGenerated)
@@ -123,10 +154,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            currentStack.gameObject.SetActive(true);
-            currentStack.StopStack();
-            currentStack.gameObject.AddComponent<Rigidbody>().mass = 100f;
-            LostGame();
+            LostGame(false);
         }
     }
 

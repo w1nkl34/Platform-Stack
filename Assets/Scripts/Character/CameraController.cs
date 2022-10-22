@@ -45,6 +45,12 @@ public class CameraController : MonoBehaviour
          0, GameObject.FindGameObjectWithTag("finishStack").transform.position.z);
     }
 
+    public void ChangeCameraLookAtPositionToStart()
+    {
+        cameraLookAt.transform.position = new Vector3(0,
+         0, GameObject.FindGameObjectWithTag("startStack").transform.position.z);
+    }
+
 
     public void ChangeCameraLookAtPosition()
     {
