@@ -42,8 +42,8 @@ public class StackController : MonoBehaviour
     private void MoveStack()
     {
         if (toLeft)
-            transform.position = new Vector3(transform.position.x + Time.deltaTime * speed, transform.position.y, transform.position.z);
+            transform.position = new Vector3(transform.position.x + Time.deltaTime * (speed + (Constants.level * 0.25f)), transform.position.y, transform.position.z);
         else
-            transform.position = new Vector3(transform.position.x - Time.deltaTime * speed, transform.position.y, transform.position.z);
+            transform.position = new Vector3(transform.position.x - Time.deltaTime * (speed + (Constants.level * 0.25f)), transform.position.y, transform.position.z);
     }
 }

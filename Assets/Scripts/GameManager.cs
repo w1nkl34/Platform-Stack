@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Cinemachine;
+
 
 public class GameManager : MonoBehaviour
 {
@@ -11,11 +11,12 @@ public class GameManager : MonoBehaviour
     public int gameIncreaseByLevel = 2;
     private MyCharacterController myCharacterController;
     private CameraController cameraController;
-
+    private UIController uIController;
 
     private void Awake()
     {
         myCharacterController = FindObjectOfType<MyCharacterController>();
+        uIController = FindObjectOfType<UIController>();
         cameraController = myCharacterController.GetComponent<CameraController>();
     }
 
@@ -26,6 +27,7 @@ public class GameManager : MonoBehaviour
 
     public void NextLevel()
     {
+        uIController.LevelTextUpdate();
         GenerateGame();
     }
 
@@ -33,6 +35,7 @@ public class GameManager : MonoBehaviour
     {
         ResetGame();
         GenerateLevel();
+        uIController.ShowClickToPlay(true);
         Constants.gameGenerated = true;
     }
 
@@ -65,6 +68,7 @@ public class GameManager : MonoBehaviour
         Constants.gameGenerated = false;
         cameraController.CameraChange(true);
         myCharacterController.WonGameBegin(this);
+        uIController.ShowYouWin();
     }
 
     private void LostGame(bool fromUpdate)
@@ -75,6 +79,7 @@ public class GameManager : MonoBehaviour
         Constants.allStackControllers[Constants.currentStack - beforeStack].gameObject.AddComponent<Rigidbody>().mass = 100f;
         Constants.gameGenerated = false;
         myCharacterController.UseGravity(true);
+        uIController.ShowYouLost();
         StartCoroutine(LevelRepeat());
     }
 
@@ -161,6 +166,7 @@ public class GameManager : MonoBehaviour
     private void PlayerStartGame()
     {
         StartGame();
+        uIController.ShowClickToPlay(false);
         Constants.gameStarted = true;
     }
 
