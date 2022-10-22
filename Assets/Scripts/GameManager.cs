@@ -12,10 +12,12 @@ public class GameManager : MonoBehaviour
     private MyCharacterController myCharacterController;
     private CameraController cameraController;
     private UIController uIController;
+    private AudioManager audioManager;
 
     private void Awake()
     {
         myCharacterController = FindObjectOfType<MyCharacterController>();
+        audioManager = FindObjectOfType<AudioManager>();
         uIController = FindObjectOfType<UIController>();
         cameraController = myCharacterController.GetComponent<CameraController>();
     }
@@ -42,6 +44,7 @@ public class GameManager : MonoBehaviour
     private void ResetGame()
     {
         Constants.currentStack = 1;
+        ResetSuccessCombo();
         Destroy(GameObject.FindGameObjectWithTag("finishStack"));
         Destroy(GameObject.FindGameObjectWithTag("startStack"));
         myCharacterController.UseGravity(false);
@@ -133,6 +136,16 @@ public class GameManager : MonoBehaviour
         NextStack();
     }
 
+    private void PlaySuccessSound()
+    {
+        audioManager.PlaySuccessSound();
+    }
+
+    private void ResetSuccessCombo()
+    {
+        audioManager.ResetCombo();
+    }
+
     private void NextStack()
     {
         Constants.currentStack++;
@@ -143,6 +156,11 @@ public class GameManager : MonoBehaviour
 
         if (cutStack != null)
         {
+            if (Constants.allStackControllers[Constants.currentStack - 1].transform.localScale.x !=
+                cutStack.GetComponent<StackController>().transform.localScale.x)
+            ResetSuccessCombo();
+            PlaySuccessSound();
+
             Constants.allStackControllers[Constants.currentStack - 1] = cutStack.GetComponent<StackController>();
             cameraController.ChangeCameraLookAtPosition();
             if (Constants.currentStack == gameLength + gameIncreaseByLevel * Constants.level)
